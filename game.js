@@ -168,15 +168,18 @@ function updateBall(dt) {
   if (ball.x - ball.r < 0) {
     ball.x = ball.r;
     ball.vx = Math.abs(ball.vx);
+    SFX.bounce.cloneNode().play();
   } else if (ball.x + ball.r > LOGICAL_W) {
     ball.x = LOGICAL_W - ball.r;
     ball.vx = -Math.abs(ball.vx);
+    SFX.bounce.cloneNode().play();
   }
 
   // Ceiling
   if (ball.y - ball.r < 0) {
     ball.y = ball.r;
     ball.vy = Math.abs(ball.vy);
+    SFX.bounce.cloneNode().play();
   }
 
   // Paddle collision (AABB vs circle, top face only)
@@ -189,6 +192,7 @@ function updateBall(dt) {
   ) {
     ball.y = pad.y - ball.r;
     ball.vy = -Math.abs(ball.vy);
+    SFX.bounce.cloneNode().play();
     // Deflect vx based on hit position relative to paddle centre (-1 … +1)
     const rel = (ball.x - (pad.x + pad.w / 2)) / (pad.w / 2);
     ball.vx = rel * 400;
