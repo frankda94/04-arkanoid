@@ -212,11 +212,16 @@ function updateBricks(now) {
   }
 }
 
+function updateExplosions(now) {
+  state.explosions = state.explosions.filter(e => now - e.startTime < EXPLOSION_DURATION);
+}
+
 function update(dt, now) {
   if (state.screen !== 'playing') return;
   updatePaddle(dt);
   updateBall(dt);
   updateBricks(now);
+  updateExplosions(now);
 }
 
 function render(now) {
@@ -231,6 +236,14 @@ function render(now) {
     drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
     const b = state.ball;
     drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+
+    for (const e of state.explosions) {
+      const frame = Math.min(
+        Math.floor((now - e.startTime) / (EXPLOSION_DURATION / 4)),
+        3
+      );
+      drawFrame(ctx, EXPLOSION_FRAMES[e.color][frame], e.x, e.y, BRICK_W, BRICK_H);
+    }
   }
 }
 
