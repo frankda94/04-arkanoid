@@ -1,6 +1,6 @@
 # SPEC 01 — MVP del juego Arkanoid
 
-> **Estado:** Aprobado · **Depende de:** — · **Fecha:** 2026-06-07
+> **Estado:** Implementado · **Depende de:** — · **Fecha:** 2026-06-07
 > **Objetivo:** Implementar un juego Arkanoid jugable en el browser con un nivel
 > fijo, 3 vidas, puntaje por bloque roto y top 5 highscores persistidos en localStorage.
 
