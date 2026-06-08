@@ -1,5 +1,6 @@
 const LOGICAL_W = 480;
 const LOGICAL_H = 640;
+const PADDLE_SPEED = 400; // logical px/s
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -14,6 +15,21 @@ function toLogicalX(realX) {
   return realX / getScale();
 }
 
+// Input state
+const keys = {};
+let mouseLogicalX = null; // null = not yet moved
+
+window.addEventListener('keydown', e => {
+  keys[e.code] = true;
+  if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') mouseLogicalX = null;
+});
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouseLogicalX = toLogicalX(e.clientX - rect.left);
+});
+
 const state = {
   screen: 'start',
   lives: 3,
@@ -26,7 +42,7 @@ const state = {
 };
 
 function initState() {
-  state.screen = 'start';
+  state.screen = 'playing'; // temporary; Step 8 sets this to 'start'
   state.lives = 3;
   state.score = 0;
   state.paddle.x = (LOGICAL_W - state.paddle.w) / 2;
@@ -54,9 +70,35 @@ function loadHighScores() {
   }
 }
 
-function update(dt) { /* filled in later steps */ }
+function clampPaddle() {
+  state.paddle.x = Math.max(0, Math.min(LOGICAL_W - state.paddle.w, state.paddle.x));
+}
 
-function render(now) { /* filled in later steps */ }
+function updatePaddle(dt) {
+  if (mouseLogicalX !== null) {
+    // Center paddle on mouse X
+    state.paddle.x = mouseLogicalX - state.paddle.w / 2;
+  } else {
+    if (keys['ArrowLeft'])  state.paddle.x -= PADDLE_SPEED * dt;
+    if (keys['ArrowRight']) state.paddle.x += PADDLE_SPEED * dt;
+  }
+  clampPaddle();
+}
+
+function update(dt) {
+  if (state.screen !== 'playing') return;
+  updatePaddle(dt);
+}
+
+function render(now) {
+  ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+  if (state.screen === 'playing') {
+    drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
+  }
+}
 
 let lastTime = null;
 
