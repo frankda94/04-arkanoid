@@ -1,6 +1,6 @@
 # SPEC 02 — Bloques multi-hit con visual de daño
 
-> **Estado:** aprobado · **Depende de:** 01-mvp-arkanoid · **Fecha:** 2026-06-08
+> **Estado:** implementado · **Depende de:** 01-mvp-arkanoid · **Fecha:** 2026-06-08
 > **Objetivo:** Añadir HP a los bloques (grises = 2 hits, resto = 1), mostrar el daño
 > cambiando el sprite a gris, y ajustar victoria a "todos los bloques recibieron al menos un hit".
 
@@ -70,16 +70,16 @@ Inicialización de `maxHp` al crear los bricks:
 
 ## Criterios de aceptación
 
-- [ ] Al iniciar, los bloques grises muestran `hp: 2`; todos los demás `hp: 1`.
-- [ ] Un bloque no-gris desaparece al primer hit con su animación de explosión.
-- [ ] Un bloque gris recibe el primer hit: animación de explosión se reproduce, el bloque
+- [x] Al iniciar, los bloques grises muestran `hp: 2`; todos los demás `hp: 1`.
+- [x] Un bloque no-gris desaparece al primer hit con su animación de explosión.
+- [x] Un bloque gris recibe el primer hit: animación de explosión se reproduce, el bloque
       sobrevive y cambia su sprite a `block_gray`.
-- [ ] Un bloque gris recibe el segundo hit: animación de explosión se reproduce y el bloque
+- [x] Un bloque gris recibe el segundo hit: animación de explosión se reproduce y el bloque
       desaparece.
-- [ ] El puntaje solo sube al destruir un bloque (último hit). Un hit intermedio no suma puntos.
-- [ ] La condición de victoria se activa cuando todos los bloques recibieron al menos un hit
+- [x] El puntaje solo sube al destruir un bloque (último hit). Un hit intermedio no suma puntos.
+- [x] La condición de victoria se activa cuando todos los bloques recibieron al menos un hit
       (los grises no necesitan estar destruidos).
-- [ ] Al reiniciar, todos los bloques vuelven a su estado inicial (`hp = maxHp`, `damaged = false`).
+- [x] Al reiniciar, todos los bloques vuelven a su estado inicial (`hp = maxHp`, `damaged = false`).
 
 ## Decisiones
 
