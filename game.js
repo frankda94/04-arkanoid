@@ -3,13 +3,11 @@ const LOGICAL_H = 640;
 const PADDLE_SPEED = 400; // logical px/s
 
 const BRICK_COLS   = 8;
-const BRICK_ROWS   = 5;
 const BRICK_W      = 56;   // logical px (8 cols * 56 = 448, centred in 480)
 const BRICK_H      = 20;
 const BRICK_OFFSET_X = (LOGICAL_W - BRICK_COLS * BRICK_W) / 2; // 16 px margin each side
 const BRICK_OFFSET_Y = 60;  // top margin
 const BRICK_GAP    = 4;
-const ROW_COLORS   = ['red', 'hotpink', 'magenta', 'yellow', 'gray'];
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -19,20 +17,83 @@ const SFX = {
   break:  new Audio('assets/sounds/break-sound.mp3'),
 };
 
-function makeLevelBricks(rowColors) {
+// layout: array of strings, each char is color initial or '.' for empty
+// Colors: r=red, p=hotpink, m=magenta, y=yellow, g=gray, c=cyan, n=green
+function makeBricksFromLayout(layout) {
+  const colorMap = { r:'red', p:'hotpink', m:'magenta', y:'yellow', g:'gray', c:'cyan', n:'green' };
   const bricks = [];
-  for (let row = 0; row < rowColors.length; row++) {
-    for (let col = 0; col < BRICK_COLS; col++) {
-      bricks.push({ col, row, color: rowColors[row] });
+  for (let row = 0; row < layout.length; row++) {
+    for (let col = 0; col < layout[row].length; col++) {
+      const ch = layout[row][col];
+      if (ch !== '.') bricks.push({ col, row, color: colorMap[ch] });
     }
   }
   return bricks;
 }
 
 const LEVELS = [
-  { speedMultiplier: 1.0, bricks: makeLevelBricks(['red', 'hotpink', 'magenta', 'yellow', 'gray']) },
-  { speedMultiplier: 1.3, bricks: makeLevelBricks(['cyan', 'green', 'gray', 'hotpink', 'red']) },
-  { speedMultiplier: 1.6, bricks: makeLevelBricks(['gray', 'cyan', 'yellow', 'gray', 'magenta']) },
+  // Level 1 — full rectangle (classic)
+  {
+    speedMultiplier: 1.0,
+    bricks: makeBricksFromLayout([
+      'rrrrrrrr',
+      'pppppppp',
+      'mmmmmmmm',
+      'yyyyyyyy',
+      'gggggggg',
+    ]),
+  },
+  // Level 2 — pirámide (más bloques en el centro)
+  {
+    speedMultiplier: 1.3,
+    bricks: makeBricksFromLayout([
+      '....cc..',
+      '...cccc.',
+      '..cccccc',
+      '.nnnnnn.',
+      'nnnnnnnn',
+      '.yyyyyy.',
+      '..yyyy..',
+    ]),
+  },
+  // Level 3 — diamante
+  {
+    speedMultiplier: 1.6,
+    bricks: makeBricksFromLayout([
+      '...rr...',
+      '..rmmr..',
+      '.rmmmmr.',
+      'rmmmmmmr',
+      '.rmmmmr.',
+      '..rmmr..',
+      '...rr...',
+    ]),
+  },
+  // Level 4 — tablero de ajedrez
+  {
+    speedMultiplier: 1.9,
+    bricks: makeBricksFromLayout([
+      'g.g.g.g.',
+      '.c.c.c.c',
+      'g.g.g.g.',
+      '.c.c.c.c',
+      'g.g.g.g.',
+      '.c.c.c.c',
+    ]),
+  },
+  // Level 5 — cruz + bordes
+  {
+    speedMultiplier: 2.2,
+    bricks: makeBricksFromLayout([
+      'rrrrrrrr',
+      'r..pp..r',
+      'r.pppp.r',
+      'pppppppp',
+      'r.pppp.r',
+      'r..pp..r',
+      'rrrrrrrr',
+    ]),
+  },
 ];
 
 // Scale factor: logical coords → real canvas pixels
@@ -86,26 +147,7 @@ const state = {
   highScores: [],
 };
 
-function buildBricks() {
-  const bricks = [];
-  for (let row = 0; row < BRICK_ROWS; row++) {
-    for (let col = 0; col < BRICK_COLS; col++) {
-      const color = ROW_COLORS[row];
-      const maxHp = color === 'gray' ? 2 : 1;
-      bricks.push({
-        col, row,
-        color,
-        alive: true,
-        hp: maxHp,
-        maxHp,
-        damaged: false,
-        x: BRICK_OFFSET_X + col * (BRICK_W + BRICK_GAP),
-        y: BRICK_OFFSET_Y + row * (BRICK_H + BRICK_GAP),
-      });
-    }
-  }
-  return bricks;
-}
+
 
 function brickRect(b) {
   return { x: b.x, y: b.y, w: BRICK_W, h: BRICK_H };
@@ -296,7 +338,7 @@ function checkEndConditions() {
     state.screen = 'gameover';
     saveHighScore();
   } else if (state.bricks.every(b => b.hp < b.maxHp) && state.screen === 'playing') {
-    if (state.level < 3) {
+    if (state.level < LEVELS.length) {
       loadLevel(state.level + 1);
     } else {
       state.screen = 'victory';
