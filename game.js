@@ -31,12 +31,20 @@ let mouseLogicalX = null; // null = not yet moved
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') mouseLogicalX = null;
-  if (e.code === 'Space' && state.screen === 'playing') launchBall();
+  if (e.code === 'Space') {
+    if (state.screen === 'playing') launchBall();
+    else if (state.screen === 'start') startGame();
+  }
+  if (e.code === 'KeyR') {
+    if (state.screen === 'gameover' || state.screen === 'victory') startGame();
+  }
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
 canvas.addEventListener('click', () => {
   if (state.screen === 'playing') launchBall();
+  else if (state.screen === 'start') startGame();
+  else if (state.screen === 'gameover' || state.screen === 'victory') startGame();
 });
 
 canvas.addEventListener('mousemove', e => {
@@ -76,7 +84,7 @@ function brickRect(b) {
 }
 
 function initState() {
-  state.screen = 'playing'; // temporary; Step 8 sets this to 'start'
+  state.screen = 'start';
   state.lives = 3;
   state.score = 0;
   state.paddle.x = (LOGICAL_W - state.paddle.w) / 2;
@@ -86,6 +94,13 @@ function initState() {
   state.ball.vy = 0;
   state.bricks = buildBricks();
   state.explosions = [];
+}
+
+function startGame() {
+  const savedScores = state.highScores;
+  initState();
+  state.highScores = savedScores;
+  state.screen = 'playing';
 }
 
 function resetBallAndPaddle() {
@@ -233,27 +248,67 @@ function update(dt, now) {
   checkEndConditions();
 }
 
+function drawText(text, y, size, color = '#fff') {
+  ctx.fillStyle = color;
+  ctx.font = `bold ${size}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, LOGICAL_W / 2, y);
+}
+
+function renderPlaying(now) {
+  for (const b of state.bricks) {
+    if (b.alive) drawSprite(ctx, `block_${b.color}`, b.x, b.y, BRICK_W, BRICK_H);
+  }
+
+  for (const e of state.explosions) {
+    const frame = Math.min(
+      Math.floor((now - e.startTime) / (EXPLOSION_DURATION / 4)),
+      3
+    );
+    drawFrame(ctx, EXPLOSION_FRAMES[e.color][frame], e.x, e.y, BRICK_W, BRICK_H);
+  }
+
+  drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
+  const b = state.ball;
+  drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+
+  // HUD
+  drawText(`SCORE: ${state.score}`, 24, 18, '#ff0');
+  drawText(`LIVES: ${state.lives}`, 24, 18, '#ff0');
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ff0';
+  ctx.font = 'bold 18px monospace';
+  ctx.fillText(`SCORE: ${state.score}`, 8, 24);
+  ctx.textAlign = 'right';
+  ctx.fillText(`LIVES: ${state.lives}`, LOGICAL_W - 8, 24);
+}
+
+function renderStart() {
+  drawText('ARKANOID', LOGICAL_H / 2 - 60, 48, '#ff0');
+  drawText('Press SPACE or click to play', LOGICAL_H / 2 + 10, 20, '#fff');
+}
+
+function renderGameOver() {
+  drawText('GAME OVER', LOGICAL_H / 2 - 60, 48, '#f44');
+  drawText(`SCORE: ${state.score}`, LOGICAL_H / 2, 28, '#fff');
+  drawText('Press R or click to restart', LOGICAL_H / 2 + 50, 20, '#aaa');
+}
+
+function renderVictory() {
+  drawText('YOU WIN!', LOGICAL_H / 2 - 60, 48, '#4f4');
+  drawText(`SCORE: ${state.score}`, LOGICAL_H / 2, 28, '#fff');
+  drawText('Press R or click to restart', LOGICAL_H / 2 + 50, 20, '#aaa');
+}
+
 function render(now) {
   ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H);
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
 
-  if (state.screen === 'playing') {
-    for (const b of state.bricks) {
-      if (b.alive) drawSprite(ctx, `block_${b.color}`, b.x, b.y, BRICK_W, BRICK_H);
-    }
-    drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
-    const b = state.ball;
-    drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
-
-    for (const e of state.explosions) {
-      const frame = Math.min(
-        Math.floor((now - e.startTime) / (EXPLOSION_DURATION / 4)),
-        3
-      );
-      drawFrame(ctx, EXPLOSION_FRAMES[e.color][frame], e.x, e.y, BRICK_W, BRICK_H);
-    }
-  }
+  if (state.screen === 'start')    renderStart();
+  if (state.screen === 'playing')  renderPlaying(now);
+  if (state.screen === 'gameover') renderGameOver();
+  if (state.screen === 'victory')  renderVictory();
 }
 
 let lastTime = null;
