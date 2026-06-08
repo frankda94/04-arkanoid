@@ -342,12 +342,12 @@ function renderPlaying(now) {
   drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
 
   // HUD
-  drawText(`SCORE: ${state.score}`, 24, 18, '#ff0');
-  drawText(`LIVES: ${state.lives}`, 24, 18, '#ff0');
-  ctx.textAlign = 'left';
   ctx.fillStyle = '#ff0';
   ctx.font = 'bold 18px monospace';
+  ctx.textAlign = 'left';
   ctx.fillText(`SCORE: ${state.score}`, 8, 24);
+  ctx.textAlign = 'center';
+  ctx.fillText(`LEVEL ${state.level}`, LOGICAL_W / 2, 24);
   ctx.textAlign = 'right';
   ctx.fillText(`LIVES: ${state.lives}`, LOGICAL_W - 8, 24);
 }
