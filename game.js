@@ -216,12 +216,21 @@ function updateExplosions(now) {
   state.explosions = state.explosions.filter(e => now - e.startTime < EXPLOSION_DURATION);
 }
 
+function checkEndConditions() {
+  if (state.lives <= 0) {
+    state.screen = 'gameover';
+  } else if (state.bricks.every(b => !b.alive)) {
+    state.screen = 'victory';
+  }
+}
+
 function update(dt, now) {
   if (state.screen !== 'playing') return;
   updatePaddle(dt);
   updateBall(dt);
   updateBricks(now);
   updateExplosions(now);
+  checkEndConditions();
 }
 
 function render(now) {
