@@ -224,6 +224,7 @@ function updateBricks(now) {
     if (b.hp <= 0) {
       b.alive = false;
       state.score += 10;
+      SFX.break.cloneNode().play();
     } else {
       b.damaged = true;
     }
