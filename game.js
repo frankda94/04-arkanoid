@@ -231,11 +231,23 @@ function updateExplosions(now) {
   state.explosions = state.explosions.filter(e => now - e.startTime < EXPLOSION_DURATION);
 }
 
+function saveHighScore() {
+  const date = new Date().toISOString().slice(0, 10);
+  state.highScores.push({ score: state.score, date });
+  state.highScores.sort((a, b) => b.score - a.score);
+  state.highScores = state.highScores.slice(0, 5);
+  try {
+    localStorage.setItem('arkanoid:scores:v1', JSON.stringify(state.highScores));
+  } catch {}
+}
+
 function checkEndConditions() {
-  if (state.lives <= 0) {
+  if (state.lives <= 0 && state.screen === 'playing') {
     state.screen = 'gameover';
-  } else if (state.bricks.every(b => !b.alive)) {
+    saveHighScore();
+  } else if (state.bricks.every(b => !b.alive) && state.screen === 'playing') {
     state.screen = 'victory';
+    saveHighScore();
   }
 }
 
@@ -288,16 +300,25 @@ function renderStart() {
   drawText('Press SPACE or click to play', LOGICAL_H / 2 + 10, 20, '#fff');
 }
 
+function renderHighScores(startY) {
+  drawText('TOP 5', startY, 18, '#ff0');
+  state.highScores.forEach((entry, i) => {
+    drawText(`${i + 1}. ${entry.score}  ${entry.date}`, startY + 24 + i * 22, 16, '#ccc');
+  });
+}
+
 function renderGameOver() {
-  drawText('GAME OVER', LOGICAL_H / 2 - 60, 48, '#f44');
-  drawText(`SCORE: ${state.score}`, LOGICAL_H / 2, 28, '#fff');
-  drawText('Press R or click to restart', LOGICAL_H / 2 + 50, 20, '#aaa');
+  drawText('GAME OVER', 160, 48, '#f44');
+  drawText(`SCORE: ${state.score}`, 220, 28, '#fff');
+  renderHighScores(270);
+  drawText('Press R or click to restart', 590, 20, '#aaa');
 }
 
 function renderVictory() {
-  drawText('YOU WIN!', LOGICAL_H / 2 - 60, 48, '#4f4');
-  drawText(`SCORE: ${state.score}`, LOGICAL_H / 2, 28, '#fff');
-  drawText('Press R or click to restart', LOGICAL_H / 2 + 50, 20, '#aaa');
+  drawText('YOU WIN!', 160, 48, '#4f4');
+  drawText(`SCORE: ${state.score}`, 220, 28, '#fff');
+  renderHighScores(270);
+  drawText('Press R or click to restart', 590, 20, '#aaa');
 }
 
 function render(now) {
