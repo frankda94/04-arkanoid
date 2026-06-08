@@ -2,6 +2,15 @@ const LOGICAL_W = 480;
 const LOGICAL_H = 640;
 const PADDLE_SPEED = 400; // logical px/s
 
+const BRICK_COLS   = 8;
+const BRICK_ROWS   = 5;
+const BRICK_W      = 56;   // logical px (8 cols * 56 = 448, centred in 480)
+const BRICK_H      = 20;
+const BRICK_OFFSET_X = (LOGICAL_W - BRICK_COLS * BRICK_W) / 2; // 16 px margin each side
+const BRICK_OFFSET_Y = 60;  // top margin
+const BRICK_GAP    = 4;
+const ROW_COLORS   = ['red', 'hotpink', 'magenta', 'yellow', 'gray'];
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
@@ -46,6 +55,26 @@ const state = {
   highScores: [],
 };
 
+function buildBricks() {
+  const bricks = [];
+  for (let row = 0; row < BRICK_ROWS; row++) {
+    for (let col = 0; col < BRICK_COLS; col++) {
+      bricks.push({
+        col, row,
+        color: ROW_COLORS[row],
+        alive: true,
+        x: BRICK_OFFSET_X + col * (BRICK_W + BRICK_GAP),
+        y: BRICK_OFFSET_Y + row * (BRICK_H + BRICK_GAP),
+      });
+    }
+  }
+  return bricks;
+}
+
+function brickRect(b) {
+  return { x: b.x, y: b.y, w: BRICK_W, h: BRICK_H };
+}
+
 function initState() {
   state.screen = 'playing'; // temporary; Step 8 sets this to 'start'
   state.lives = 3;
@@ -55,7 +84,7 @@ function initState() {
   state.ball.attached = true;
   state.ball.vx = 0;
   state.ball.vy = 0;
-  state.bricks = [];
+  state.bricks = buildBricks();
   state.explosions = [];
 }
 
@@ -149,10 +178,45 @@ function updateBall(dt) {
   }
 }
 
-function update(dt) {
+function updateBricks(now) {
+  const ball = state.ball;
+  if (ball.attached) return;
+
+  for (const b of state.bricks) {
+    if (!b.alive) continue;
+    const r = brickRect(b);
+
+    // AABB overlap
+    const overlapX = ball.x + ball.r > r.x && ball.x - ball.r < r.x + r.w;
+    const overlapY = ball.y + ball.r > r.y && ball.y - ball.r < r.y + r.h;
+    if (!overlapX || !overlapY) continue;
+
+    b.alive = false;
+    state.score += 10;
+    state.explosions.push({ x: r.x, y: r.y, color: b.color, startTime: now });
+
+    // Determine dominant collision axis to decide which velocity to invert
+    const overlapLeft   = (ball.x + ball.r) - r.x;
+    const overlapRight  = (r.x + r.w) - (ball.x - ball.r);
+    const overlapTop    = (ball.y + ball.r) - r.y;
+    const overlapBottom = (r.y + r.h) - (ball.y - ball.r);
+    const minX = Math.min(overlapLeft, overlapRight);
+    const minY = Math.min(overlapTop, overlapBottom);
+
+    if (minX < minY) {
+      ball.vx = -ball.vx;
+    } else {
+      ball.vy = -ball.vy;
+    }
+    break; // one brick per frame to avoid tunnelling through corners
+  }
+}
+
+function update(dt, now) {
   if (state.screen !== 'playing') return;
   updatePaddle(dt);
   updateBall(dt);
+  updateBricks(now);
 }
 
 function render(now) {
@@ -161,6 +225,9 @@ function render(now) {
   ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
 
   if (state.screen === 'playing') {
+    for (const b of state.bricks) {
+      if (b.alive) drawSprite(ctx, `block_${b.color}`, b.x, b.y, BRICK_W, BRICK_H);
+    }
     drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
     const b = state.ball;
     drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
@@ -174,7 +241,7 @@ function loop(timestamp) {
   const dt = Math.min((timestamp - lastTime) / 1000, 0.05); // cap at 50ms
   lastTime = timestamp;
 
-  update(dt);
+  update(dt, timestamp);
   render(timestamp);
 
   requestAnimationFrame(loop);
