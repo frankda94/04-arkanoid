@@ -77,6 +77,8 @@ const state = {
   screen: 'start',
   lives: 3,
   score: 0,
+  level: 1,
+  speedMultiplier: 1.0,
   paddle: { x: 0, y: 0, w: 162, h: 14 },
   ball: { x: 0, y: 0, vx: 0, vy: 0, r: 8, attached: true },
   bricks: [],
@@ -109,17 +111,29 @@ function brickRect(b) {
   return { x: b.x, y: b.y, w: BRICK_W, h: BRICK_H };
 }
 
+function loadLevel(n) {
+  const lvl = LEVELS[n - 1];
+  state.level = n;
+  state.speedMultiplier = lvl.speedMultiplier;
+  state.bricks = lvl.bricks.map(b => {
+    const maxHp = b.color === 'gray' ? 2 : 1;
+    return {
+      col: b.col, row: b.row, color: b.color,
+      alive: true, hp: maxHp, maxHp, damaged: false,
+      x: BRICK_OFFSET_X + b.col * (BRICK_W + BRICK_GAP),
+      y: BRICK_OFFSET_Y + b.row * (BRICK_H + BRICK_GAP),
+    };
+  });
+  resetBallAndPaddle();
+  state.explosions = [];
+}
+
 function initState() {
   state.screen = 'start';
   state.lives = 3;
   state.score = 0;
-  state.paddle.x = (LOGICAL_W - state.paddle.w) / 2;
   state.paddle.y = LOGICAL_H - 40;
-  state.ball.attached = true;
-  state.ball.vx = 0;
-  state.ball.vy = 0;
-  state.bricks = buildBricks();
-  state.explosions = [];
+  loadLevel(1);
 }
 
 function startGame() {
