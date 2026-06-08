@@ -177,8 +177,8 @@ function updatePaddle(dt) {
 function launchBall() {
   if (!state.ball.attached) return;
   state.ball.attached = false;
-  state.ball.vx = 200;
-  state.ball.vy = -400;
+  state.ball.vx = 200 * state.speedMultiplier;
+  state.ball.vy = -400 * state.speedMultiplier;
 }
 
 function updateBall(dt) {
