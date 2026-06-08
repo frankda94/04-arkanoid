@@ -115,21 +115,21 @@ Se llaman con `SFX.bounce.cloneNode().play()` para permitir solapamiento de soni
 
 ## Criterios de aceptación
 
-- [ ] `ball-bounce.mp3` suena en cada rebote contra pared izquierda, derecha, techo y paddle.
-- [ ] `break-sound.mp3` suena al destruir completamente cualquier bloque (último hit).
-- [ ] `break-sound.mp3` NO suena en el hit intermedio de un bloque gris.
-- [ ] No hay errores de consola relacionados con audio (política de autoplay cubierta
+- [x] `ball-bounce.mp3` suena en cada rebote contra pared izquierda, derecha, techo y paddle.
+- [x] `break-sound.mp3` suena al destruir completamente cualquier bloque (último hit).
+- [x] `break-sound.mp3` NO suena en el hit intermedio de un bloque gris.
+- [x] No hay errores de consola relacionados con audio (política de autoplay cubierta
       porque el usuario ya interactuó al lanzar la pelota).
-- [ ] Al iniciar, el juego carga el nivel 1 con el layout y velocidad base del MVP.
-- [ ] El nivel 2 muestra un layout distinto al nivel 1 y la pelota es más rápida.
-- [ ] El nivel 3 muestra un layout distinto al nivel 2 y la pelota es más rápida que en nivel 2.
-- [ ] Al completar el nivel 1, el juego carga el nivel 2 sin pantalla intermedia,
+- [x] Al iniciar, el juego carga el nivel 1 con el layout y velocidad base del MVP.
+- [x] El nivel 2 muestra un layout distinto al nivel 1 y la pelota es más rápida.
+- [x] El nivel 3 muestra un layout distinto al nivel 2 y la pelota es más rápida que en nivel 2.
+- [x] Al completar el nivel 1, el juego carga el nivel 2 sin pantalla intermedia,
       conservando score y vidas.
-- [ ] Al completar el nivel 2, el juego carga el nivel 3 conservando score y vidas.
-- [ ] Al completar el nivel 3, aparece la pantalla de victoria total.
-- [ ] El indicador "LEVEL N" es visible en pantalla durante el juego y se actualiza al pasar de nivel.
-- [ ] El puntaje acumulado de niveles anteriores se conserva al entrar al siguiente nivel.
-- [ ] Al reiniciar desde cualquier pantalla de fin, el juego empieza desde el nivel 1.
+- [x] Al completar el nivel 2, el juego carga el nivel 3 conservando score y vidas.
+- [x] Al completar el nivel 3, aparece la pantalla de victoria total.
+- [x] El indicador "LEVEL N" es visible en pantalla durante el juego y se actualiza al pasar de nivel.
+- [x] El puntaje acumulado de niveles anteriores se conserva al entrar al siguiente nivel.
+- [x] Al reiniciar desde cualquier pantalla de fin, el juego empieza desde el nivel 1.
 
 ## Decisiones
 
