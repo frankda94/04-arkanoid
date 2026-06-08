@@ -296,8 +296,12 @@ function checkEndConditions() {
     state.screen = 'gameover';
     saveHighScore();
   } else if (state.bricks.every(b => b.hp < b.maxHp) && state.screen === 'playing') {
-    state.screen = 'victory';
-    saveHighScore();
+    if (state.level < 3) {
+      loadLevel(state.level + 1);
+    } else {
+      state.screen = 'victory';
+      saveHighScore();
+    }
   }
 }
 
