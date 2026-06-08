@@ -1,6 +1,6 @@
 # SPEC 03 — Audio y niveles progresivos
 
-> **Estado:** Draft · **Depende de:** 01-mvp-arkanoid, 02-bloques-multi-hit · **Fecha:** 2026-06-08
+> **Estado:** aprobado · **Depende de:** 01-mvp-arkanoid, 02-bloques-multi-hit · **Fecha:** 2026-06-08
 > **Objetivo:** Integrar los dos sonidos existentes en los eventos de juego e implementar
 > 3 niveles con layouts de bloques distintos y velocidad de pelota creciente,
 > conservando el puntaje acumulado entre niveles.

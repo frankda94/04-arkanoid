@@ -14,6 +14,11 @@ const ROW_COLORS   = ['red', 'hotpink', 'magenta', 'yellow', 'gray'];
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 
+const SFX = {
+  bounce: new Audio('assets/sounds/ball-bounce.mp3'),
+  break:  new Audio('assets/sounds/break-sound.mp3'),
+};
+
 // Scale factor: logical coords → real canvas pixels
 function getScale() {
   return canvas.getBoundingClientRect().width / LOGICAL_W;
