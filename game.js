@@ -22,8 +22,13 @@ let mouseLogicalX = null; // null = not yet moved
 window.addEventListener('keydown', e => {
   keys[e.code] = true;
   if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') mouseLogicalX = null;
+  if (e.code === 'Space' && state.screen === 'playing') launchBall();
 });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+canvas.addEventListener('click', () => {
+  if (state.screen === 'playing') launchBall();
+});
 
 canvas.addEventListener('mousemove', e => {
   const rect = canvas.getBoundingClientRect();
@@ -85,9 +90,69 @@ function updatePaddle(dt) {
   clampPaddle();
 }
 
+function launchBall() {
+  if (!state.ball.attached) return;
+  state.ball.attached = false;
+  state.ball.vx = 200;
+  state.ball.vy = -400;
+}
+
+function updateBall(dt) {
+  const ball = state.ball;
+  const pad  = state.paddle;
+
+  if (ball.attached) {
+    ball.x = pad.x + pad.w / 2;
+    ball.y = pad.y - ball.r;
+    return;
+  }
+
+  ball.x += ball.vx * dt;
+  ball.y += ball.vy * dt;
+
+  // Wall: left / right
+  if (ball.x - ball.r < 0) {
+    ball.x = ball.r;
+    ball.vx = Math.abs(ball.vx);
+  } else if (ball.x + ball.r > LOGICAL_W) {
+    ball.x = LOGICAL_W - ball.r;
+    ball.vx = -Math.abs(ball.vx);
+  }
+
+  // Ceiling
+  if (ball.y - ball.r < 0) {
+    ball.y = ball.r;
+    ball.vy = Math.abs(ball.vy);
+  }
+
+  // Paddle collision (AABB vs circle, top face only)
+  if (
+    ball.vy > 0 &&
+    ball.y + ball.r >= pad.y &&
+    ball.y - ball.r <= pad.y + pad.h &&
+    ball.x >= pad.x &&
+    ball.x <= pad.x + pad.w
+  ) {
+    ball.y = pad.y - ball.r;
+    ball.vy = -Math.abs(ball.vy);
+    // Deflect vx based on hit position relative to paddle centre (-1 … +1)
+    const rel = (ball.x - (pad.x + pad.w / 2)) / (pad.w / 2);
+    ball.vx = rel * 400;
+    // Keep minimum horizontal speed so ball never goes straight up
+    if (Math.abs(ball.vx) < 40) ball.vx = 40 * Math.sign(ball.vx || 1);
+  }
+
+  // Ball lost
+  if (ball.y - ball.r > LOGICAL_H) {
+    state.lives -= 1;
+    resetBallAndPaddle();
+  }
+}
+
 function update(dt) {
   if (state.screen !== 'playing') return;
   updatePaddle(dt);
+  updateBall(dt);
 }
 
 function render(now) {
@@ -97,6 +162,8 @@ function render(now) {
 
   if (state.screen === 'playing') {
     drawSprite(ctx, 'paddle', state.paddle.x, state.paddle.y, state.paddle.w, state.paddle.h);
+    const b = state.ball;
+    drawSprite(ctx, 'ball', b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
   }
 }
 
