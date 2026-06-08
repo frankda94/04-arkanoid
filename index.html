@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arkanoid</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #game {
+      display: block;
+      /* Maintain 3:4 aspect ratio (480×640), max width 480px */
+      width: min(100vw, calc(100vh * 3 / 4), 480px);
+      height: min(100vh, calc(100vw * 4 / 3), 640px);
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="480" height="640"></canvas>
+  <script src="assets/spritesheet.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
