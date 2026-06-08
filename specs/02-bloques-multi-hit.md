@@ -1,6 +1,6 @@
 # SPEC 02 — Bloques multi-hit con visual de daño
 
-> **Estado:** Draft · **Depende de:** 01-mvp-arkanoid · **Fecha:** 2026-06-08
+> **Estado:** aprobado · **Depende de:** 01-mvp-arkanoid · **Fecha:** 2026-06-08
 > **Objetivo:** Añadir HP a los bloques (grises = 2 hits, resto = 1), mostrar el daño
 > cambiando el sprite a gris, y ajustar victoria a "todos los bloques recibieron al menos un hit".
 

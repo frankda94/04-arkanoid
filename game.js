@@ -67,10 +67,15 @@ function buildBricks() {
   const bricks = [];
   for (let row = 0; row < BRICK_ROWS; row++) {
     for (let col = 0; col < BRICK_COLS; col++) {
+      const color = ROW_COLORS[row];
+      const maxHp = color === 'gray' ? 2 : 1;
       bricks.push({
         col, row,
-        color: ROW_COLORS[row],
+        color,
         alive: true,
+        hp: maxHp,
+        maxHp,
+        damaged: false,
         x: BRICK_OFFSET_X + col * (BRICK_W + BRICK_GAP),
         y: BRICK_OFFSET_Y + row * (BRICK_H + BRICK_GAP),
       });
@@ -206,8 +211,13 @@ function updateBricks(now) {
     const overlapY = ball.y + ball.r > r.y && ball.y - ball.r < r.y + r.h;
     if (!overlapX || !overlapY) continue;
 
-    b.alive = false;
-    state.score += 10;
+    b.hp--;
+    if (b.hp <= 0) {
+      b.alive = false;
+      state.score += 10;
+    } else {
+      b.damaged = true;
+    }
     state.explosions.push({ x: r.x, y: r.y, color: b.color, startTime: now });
 
     // Determine dominant collision axis to decide which velocity to invert
@@ -245,7 +255,7 @@ function checkEndConditions() {
   if (state.lives <= 0 && state.screen === 'playing') {
     state.screen = 'gameover';
     saveHighScore();
-  } else if (state.bricks.every(b => !b.alive) && state.screen === 'playing') {
+  } else if (state.bricks.every(b => b.hp < b.maxHp) && state.screen === 'playing') {
     state.screen = 'victory';
     saveHighScore();
   }
@@ -269,7 +279,10 @@ function drawText(text, y, size, color = '#fff') {
 
 function renderPlaying(now) {
   for (const b of state.bricks) {
-    if (b.alive) drawSprite(ctx, `block_${b.color}`, b.x, b.y, BRICK_W, BRICK_H);
+    if (b.alive) {
+      const sprite = b.damaged ? 'block_gray' : `block_${b.color}`;
+      drawSprite(ctx, sprite, b.x, b.y, BRICK_W, BRICK_H);
+    }
   }
 
   for (const e of state.explosions) {
