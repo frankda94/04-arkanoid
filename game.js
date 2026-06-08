@@ -19,6 +19,22 @@ const SFX = {
   break:  new Audio('assets/sounds/break-sound.mp3'),
 };
 
+function makeLevelBricks(rowColors) {
+  const bricks = [];
+  for (let row = 0; row < rowColors.length; row++) {
+    for (let col = 0; col < BRICK_COLS; col++) {
+      bricks.push({ col, row, color: rowColors[row] });
+    }
+  }
+  return bricks;
+}
+
+const LEVELS = [
+  { speedMultiplier: 1.0, bricks: makeLevelBricks(['red', 'hotpink', 'magenta', 'yellow', 'gray']) },
+  { speedMultiplier: 1.3, bricks: makeLevelBricks(['cyan', 'green', 'gray', 'hotpink', 'red']) },
+  { speedMultiplier: 1.6, bricks: makeLevelBricks(['gray', 'cyan', 'yellow', 'gray', 'magenta']) },
+];
+
 // Scale factor: logical coords → real canvas pixels
 function getScale() {
   return canvas.getBoundingClientRect().width / LOGICAL_W;
